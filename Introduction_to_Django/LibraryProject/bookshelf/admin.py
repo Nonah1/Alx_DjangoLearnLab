@@ -1,8 +1,8 @@
-from bookshelf.models import Book
+from .models import Book
 from django.contrib import admin
 
 # Register your models here.
-class BookAdmin(admin.ModeAdmin):
+class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'published_year')
     search_fields = ('title', 'author')
 
