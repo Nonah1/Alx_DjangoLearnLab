@@ -1,4 +1,4 @@
-from models import Author, Book, Library, Librarian
+from relationship_app.models import Author, Book, Library, Librarian
 
 # 1. Authors with their books
 authors = Author.objects.prefetch_related('books')
