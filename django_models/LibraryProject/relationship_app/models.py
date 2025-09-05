@@ -27,7 +27,7 @@ class Librarian(models.Model):
     def __str__(self):
         return self.name
 
-books = Book.objects.select_related('author').all()
+
 
 
 
