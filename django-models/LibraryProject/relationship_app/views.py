@@ -1,6 +1,6 @@
-from django.shortcuts import render
-from django.views.generic import ListView
-from .models import Book
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView
+from .models import Book, Library
 
 # Create your views here
 def list_books(request):
@@ -9,11 +9,11 @@ def list_books(request):
     
     context = {"books": books}
 
-    return render(request, 'book/book_list.html', context)
+    return render(request, 'relationship_app/book_list.html', context)
 
 class LibraryView(ListView):
     model = Book
-    template_name = 'books/library_detail.html'
+    template_name = 'relationship_app/library_detail.html'
 
     books = Book.objects.all()
 
