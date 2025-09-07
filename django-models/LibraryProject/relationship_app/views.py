@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
-from .models import Book, Library
+from .models import Library
 
 # Create your views here
 def list_books(request):
