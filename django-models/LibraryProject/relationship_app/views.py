@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView
+from django.views.generic.detail import ListView, DetailView
 from .models import Library
 
 # Create your views here
