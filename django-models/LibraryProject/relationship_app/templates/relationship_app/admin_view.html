@@ -1,0 +1,15 @@
+{% extends "relationship_app/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, Admin {{ user.username }} 👑</h2>
+<p>You have full control over the system.</p>
+
+<ul>
+    <li>Manage Users</li>
+    <li>Manage Librarians</li>
+    <li>Manage Books</li>
+</ul>
+{% endblock %}
+ 
