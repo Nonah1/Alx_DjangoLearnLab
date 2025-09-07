@@ -5,7 +5,7 @@ from .models import Library
 # Create your views here
 def list_books(request):
     #Displays list
-    books = Library.objects.all()    
+    books = Book.objects.all()    
     context = {"books": books}
     return render(request, 'relationship_app/list_books.html', context)
 
