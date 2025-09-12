@@ -2,6 +2,22 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required
 from .models import Book
+from .forms import ExampleForm
+
+def example_form_view(request):
+    if request.method == "POST":
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # Normally, you'd save data or process it
+            return render(request, "bookshelf/form_example.html", {
+                "form": form,
+                "submitted": True,
+                "cleaned_data": form.cleaned_data,
+            })
+    else:
+        form = ExampleForm()
+
+    return render(request, "bookshelf/form_example.html", {"form": form})
 
 @permission_required('bookshelf.can_view', raise_exception=True)
 def book_list(request):
