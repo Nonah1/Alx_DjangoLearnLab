@@ -1,0 +1,15 @@
+{% extends "relationship_app/base.html" %}
+
+{% block title %}Member Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }} 👤</h2>
+<p>You can browse and borrow books.</p>
+
+<ul>
+    <li>Search available books</li>
+    <li>Borrow books</li>
+    <li>View your borrowed history</li>
+</ul>
+{% endblock %}
+ 
