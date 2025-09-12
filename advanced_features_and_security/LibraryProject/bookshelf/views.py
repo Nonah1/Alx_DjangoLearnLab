@@ -23,5 +23,13 @@ def book_delete(request, pk):
     book.delete()
     return HttpResponse("Book deleted")
 
+# Using Django ORM for queries to prevent SQL injection
+def book_search(request):
+    query = request.GET.get("q", "")
+    results = []
+    if query:
+        # SAFE: ORM handles escaping and SQL injection prevention
+        results = Book.objects.filter(title__icontains=query)
+    return render(request, "bookshelf/book_list.html", {"books": results, "query": query})
 
 # Create your views here.
