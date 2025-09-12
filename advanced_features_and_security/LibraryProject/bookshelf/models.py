@@ -1,6 +1,8 @@
-from django.db import models
+from django.db import models Group, Permission
 from django.contrib.auth.models import User, AbstractUser, BaseUserManager
+from django.contrib.auth.models import 
 
+content_type = ContentType.objects.get_for_model(Book)
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -14,7 +16,6 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, username, email=None, paasword=None):
         extra_field.setdefault("is_admin", True)
-
         if extra_field.set.default("is_admin") is not True:
             raise ValueError("SuperUser must have is_admin=True")
 
@@ -34,9 +35,25 @@ class Book(models.Model):
     author = models.CharField(max_length=100)
     publication_year = models.IntegerField()
 
+    class Meta:
+        permissions =[
+            ("can_view", "Can view Book")
+            ("can_create", "Can create Book")
+            ("can_edit", "Can edit Book")
+            ("can_delete", "Can delete Book")
+]
+
     def __str__(self):
         return f"{self.title} by {self.author} ({self.publication_year})"
 
+#define permission
+view_permission = Permission.objects.get(codename="can_view", content_type=content_type)
+create_permission = Permission.objects.get(codename="can_create", content_type=cpntent_type)
+edit_permission = Permission.objects.get(codename="can_edit", content_type=content_type)
+delete_permission = Permission.objects.get(codename="can_delete", content_type=content_type)
 
-
+#create groups
+viewers.permissions.set([view_permissions])
+editors.permissions.set([edit_permissions, create_permission])
+editors.permissions.set([edit_permissions, create_permission, edit_permissions, delete_permission])
 
