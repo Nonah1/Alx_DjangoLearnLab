@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, permissions
 from api.models import Author, Book
 from serializers import BookSerializer, AuthorSeriaizer
+from django_filters import rest_framework
 
 # Create your views here.
 class AuthorListCreateView(generics.ListCreateAPIView):
