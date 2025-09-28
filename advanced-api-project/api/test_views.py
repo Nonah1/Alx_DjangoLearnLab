@@ -1,23 +1,20 @@
 # api/test_views.py
 from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Book
+from django.urls import reverse
 
 class BookAPITestCase(APITestCase):
     def setUp(self):
-        # Create a user and get token for authentication
+        # Create a user for authentication
         self.user = User.objects.create_user(username='testuser', password='testpass123')
-        self.client = APIClient()
-        response = self.client.post(reverse('api-token-auth'), {
-            'username': 'testuser',
-            'password': 'testpass123'
-        })
-        self.token = response.data['token']
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
 
-        # Sample book
+        # Use Django test client (session-based) for authentication
+        self.client = APIClient()
+        login_successful = self.client.login(username='testuser', password='testpass123')
+        assert login_successful, "User login failed in test setup!"
+
+        # Create a sample book
         self.book = Book.objects.create(
             title='Test Book',
             author='Author A',
