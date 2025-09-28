@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
 from .models import Book
 from django.urls import reverse
+from rest_framework import status
 
 class BookAPITestCase(APITestCase):
     def setUp(self):
