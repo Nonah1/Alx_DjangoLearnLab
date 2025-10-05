@@ -3,22 +3,17 @@ from django import forms
 from .models import Post, Profile, Tag
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from taggit.forms import TagWidget 
 
 
 User = get_user_model()
 
 class PostForm(forms.ModelForm):
- # tags input as comma-separated string
-    tags = forms.CharField(
-        required=False,
-        help_text='Comma-separated tags. Example: django, python, web',
-        widget=forms.TextInput()
-    )
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags']
+        fields = ['title', 'content', 'tags']  
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 8}),
+            'tags': TagWidget(),               
         }
 
     class Meta:
