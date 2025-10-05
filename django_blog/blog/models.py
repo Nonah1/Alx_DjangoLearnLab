@@ -1,5 +1,10 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.urls import reverse
+
 
 # Create your models here.
 class Post(models.Model):
@@ -8,12 +13,14 @@ class Post(models.Model):
     published_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['-published_date']
+
     def __str__(self):
         return self.title
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth.models import User
+    def get_absolute_url(self):
+        return reverse('post-detail', kwargs={'pk': self.pk})
 
 # helper to store uploaded avatars
 def user_directory_path(instance, filename):

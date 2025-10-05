@@ -3,49 +3,81 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, UserUpdateForm, ProfileForm
+from .forms import CustomUserCreationForm, UserUpdateForm, ProfileForm, PostForm
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
+from .models import Post
 
-# Create your views here.
+# -- Post views --
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'   # templates/blog/post_list.html
+    context_object_name = 'posts'
+    paginate_by = 10
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
+
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_form.html'
+
+    def form_valid(self, form):
+        # set the author automatically
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_form.html'
+
+    def test_func(self):
+        post = self.get_object()
+        return post.author == self.request.user
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    template_name = 'blog/post_confirm_delete.html'
+    success_url = reverse_lazy('post-list')
+
+    def test_func(self):
+        post = self.get_object()
+        return post.author == self.request.user
+
+# -- Authentication views (if not already present) --
 def register_view(request):
-    """
-    Registration view using CustomUserCreationForm.
-    On success, logs in the user and redirects to profile (or other page).
-    """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # login immediately; remove if you want email-confirmation flow
             login(request, user)
-            messages.success(request, 'Registration successful. You are now logged in.')
-            return redirect('profile')
+            messages.success(request, 'Registration successful.')
+            return redirect('post-list')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, 'Please fix the errors below.')
     else:
         form = CustomUserCreationForm()
     return render(request, 'blog/register.html', {'form': form})
 
 @login_required
 def profile_view(request):
-    """
-    View & edit profile. Handles POST to update User and Profile models, including avatar uploads.
-    """
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Your profile was updated successfully.')
+        uform = UserUpdateForm(request.POST, instance=request.user)
+        pform = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if uform.is_valid() and pform.is_valid():
+            uform.save()
+            pform.save()
+            messages.success(request, 'Profile updated.')
             return redirect('profile')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, 'Please fix the errors below.')
     else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = ProfileForm(instance=request.user.profile)
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form,
-    }
-    return render(request, 'blog/profile.html', context)
+        uform = UserUpdateForm(instance=request.user)
+        pform = ProfileForm(instance=request.user.profile)
+    return render(request, 'blog/profile.html', {'user_form': uform, 'profile_form': pform})
 
