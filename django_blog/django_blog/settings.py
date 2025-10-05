@@ -82,6 +82,15 @@ DATABASES = {
     }
 }
 
+# Media (for avatar uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Auth redirects
+LOGIN_REDIRECT_URL = 'profile'   # where to go after login
+LOGOUT_REDIRECT_URL = 'post-list'  # or 'login'
+LOGIN_URL = 'login'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
