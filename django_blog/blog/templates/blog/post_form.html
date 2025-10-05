@@ -2,6 +2,9 @@
 {% block content %}
   <h1>{% if object %}Edit post{% else %}New post{% endif %}</h1>
   <form method="post">{% csrf_token %}
+  {{ form.title.label_tag }} {{ form.title }}
+  {{ form.content.label_tag }} {{ form.content }}
+  {{ form.tags.label_tag }} {{ form.tags }}
     {{ form.as_p }}
     <button type="submit">Save</button>
   </form>

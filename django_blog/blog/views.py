@@ -7,9 +7,12 @@ from .forms import CustomUserCreationForm, UserUpdateForm, ProfileForm, PostForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.db.models import Q
+from django.utils.text import slugify
+from .forms import PostForm, CommentForm
 
 # -- Post views --
 class PostListView(ListView):
@@ -40,11 +43,46 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         # set the author automatically
         form.instance.author = self.request.user
         return super().form_valid(form)
+        # process tags string
+        tags_str = form.cleaned_data.get('tags', '')
+        self._attach_tags(self.object, tags_str)
+        return response
+
+    def _attach_tags(self, post, tags_str):
+        post.tags.clear()
+        for raw in [t.strip() for t in tags_str.split(',') if t.strip()]:
+            tag, _ = Tag.objects.get_or_create(name__iexact=raw, defaults={'name': raw, 'slug': slugify(raw)})
+            # get_or_create with case-insensitive fallback if exists with different case
+            if not tag.pk:
+                tag = Tag.objects.filter(name__iexact=raw).first() or tag
+            post.tags.add(tag)
+
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_form.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # prefill tags as comma-separated names
+        initial['tags'] = ', '.join([t.name for t in self.get_object().tags.all()])
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        tags_str = form.cleaned_data.get('tags', '')
+        self._attach_tags(self.object, tags_str)
+        return response
+
+    def _attach_tags(self, post, tags_str):
+        post.tags.clear()
+        for raw in [t.strip() for t in tags_str.split(',') if t.strip()]:
+            tag, created = Tag.objects.get_or_create(name__iexact=raw, defaults={'name': raw, 'slug': slugify(raw)})
+            if not tag.pk:
+                tag = Tag.objects.filter(name__iexact=raw).first() or tag
+            post.tags.add(tag)
+
 
     def test_func(self):
         post = self.get_object()
@@ -144,3 +182,30 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+class TagDetailView(ListView):
+    model = Post
+    template_name = 'blog/tag_detail.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        slug = self.kwargs.get('slug')
+        tag = get_object_or_404(Tag, slug=slug)
+        return tag.posts.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = get_object_or_404(Tag, slug=self.kwargs.get('slug'))
+        return context
+
+def search_view(request):
+    q = request.GET.get('q', '').strip()
+    results = Post.objects.none()
+    if q:
+        results = Post.objects.filter(
+            Q(title__icontains=q) |
+            Q(content__icontains=q) |
+            Q(tags__name__icontains=q)
+        ).distinct()
+    return render(request, 'blog/search_results.html', {'query': q, 'results': results})

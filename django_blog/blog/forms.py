@@ -1,6 +1,6 @@
 # blog/forms.py
 from django import forms
-from .models import Post, Profile, Comment
+from .models import Post, Profile, Tag
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 
@@ -8,6 +8,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class PostForm(forms.ModelForm):
+ # tags input as comma-separated string
+    tags = forms.CharField(
+        required=False,
+        help_text='Comma-separated tags. Example: django, python, web',
+        widget=forms.TextInput()
+    )
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'tags']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 8}),
+        }
+
     class Meta:
         model = Post
         fields = ['title', 'content']
@@ -43,22 +56,4 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3}),
         }
-
-class CommentForm(forms.ModelForm):
-    content = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        label='',
-        help_text='Write your comment here.',
-        max_length=2000
-    )
-
-    class Meta:
-        model = Comment
-        fields = ['content']
-
-    def clean_content(self):
-        content = self.cleaned_data.get('content', '').strip()
-        if not content:
-            raise forms.ValidationError("Comment cannot be empty.")
-        return content
 

@@ -1,5 +1,10 @@
 from django.contrib import admin
-from blog.models import Profile, Post, Comment
+from blog.models import Profile, Post, Comment, Tag
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('name',)
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):

@@ -4,9 +4,37 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.urls import reverse
+from django.utils.text import slugify
 
 
 # Create your models here.
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=60, unique=True, blank=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        # auto-generate slug if missing
+        if not self.slug:
+            base = slugify(self.name)
+            slug = base
+            # ensure uniqueness
+            i = 1
+            while Tag.objects.filter(slug=slug).exists():
+                slug = f'{base}-{i}'
+                i += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('tag-detail', kwargs={'slug': self.slug})
+
+
 class Comment(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -25,6 +53,8 @@ class Post(models.Model):
     content = models.TextField()
     published_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    tags = models.ManyToManyField(Tag, blank=True, related_name='posts')   # <-- added field
+
 
     class Meta:
         ordering = ['-published_date']
