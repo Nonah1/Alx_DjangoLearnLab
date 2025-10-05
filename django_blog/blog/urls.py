@@ -2,6 +2,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import  PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, CommentCreateView, CommentUpdateView, CommentDeleteView
+
 
 urlpatterns = [
     # Registration & profile
@@ -16,11 +18,10 @@ urlpatterns = [
     path('post/<int:pk>/', views.PostDetailView.as_view(), name='post-detail'),   # /post/1/
     path('post/new/', views.PostCreateView.as_view(), name='post-create'),        # /post/new/
     path('post/<int:pk>/update/', views.PostUpdateView.as_view(), name='post-update'),  # /post/1/update/
-    path('post/<int:pk>/delete/', views.PostDeleteView.as_view(), name='post-delete'),  # /post/1/delete/
-
-    path('post/<int:post_pk>/comments/new/', views.comment_create, name='comment-create'),
-    path('comment/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment-update'),
-    path('comment/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment-delete'),
+    path('post/<int:pk>/delete/', views.PostDeleteView.as_view(), name='post-delete'),  # /post/1/delete/# Comment URLs
+    path('post/<int:post_id>/comment/new/', CommentCreateView.as_view(), name='comment-create'),
+    path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment-update'),
+    path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
 
 
 ]
