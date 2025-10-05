@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ post.title }}{% endblock %}
+
 {% block content %}
 <article>
   <h1>{{ post.title }}</h1>
@@ -13,5 +14,41 @@
     </p>
   {% endif %}
 </article>
+
+<hr>
+
+<section id="comments">
+  <h2>Comments ({{ comments.count }})</h2>
+
+  {% if comments %}
+    {% for comment in comments %}
+      <div class="comment" id="comment-{{ comment.pk }}">
+        <p><strong>{{ comment.author.username }}</strong> • {{ comment.created_at|date:"M d, Y H:i" }}</p>
+        <div>{{ comment.content|linebreaks }}</div>
+        {% if user == comment.author %}
+          <p>
+            <a href="{% url 'comment-update' comment.pk %}">Edit</a> |
+            <a href="{% url 'comment-delete' comment.pk %}">Delete</a>
+          </p>
+        {% endif %}
+      </div>
+      <hr>
+    {% endfor %}
+  {% else %}
+    <p>No comments yet.</p>
+  {% endif %}
+</section>
+
+<section id="add-comment">
+  {% if user.is_authenticated %}
+    <h3>Leave a comment</h3>
+    <form method="post" action="{% url 'comment-create' post.pk %}">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit">Post comment</button>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to post a comment.</p>
+  {% endif %}
+</section>
 {% endblock %}
- 
